@@ -12,6 +12,7 @@ catalog-flipbook/
 ├── js/app.js               โค้ดพลิกหน้า + lazy load
 ├── lib/                    StPageFlip (วางไฟล์ library ที่นี่)
 ├── pages/                  รูปหน้าที่ optimize แล้ว (page-001.webp ...)
+│   └── zoom/               รูปคมชัดสำหรับตอน zoom
 ├── scripts/                สคริปต์ optimize รูป (รันครั้งเดียว)
 ├── vercel.json             ตั้งค่า deploy
 └── README.md
@@ -20,7 +21,7 @@ catalog-flipbook/
 ## แผนงาน (Phases)
 
 - [x] **Phase 0** — ตั้งโครงโปรเจค + git
-- [ ] **Phase 1** — optimize รูป (332MB → ~50MB, JPG → WebP, เปลี่ยนชื่อเรียงเลข)
+- [x] **Phase 1** — optimize รูป (332MB → 80.5MB, JPG → WebP, เปลี่ยนชื่อเรียงเลข)
 - [ ] **Phase 2** — หน้าเว็บพื้นฐาน + StPageFlip พลิกได้
 - [ ] **Phase 3** — lazy load + ปุ่ม (ถัดไป/ก่อนหน้า, zoom, thumbnail, มือถือ)
 - [ ] **Phase 4** — deploy Vercel
@@ -34,4 +35,4 @@ catalog-flipbook/
 ## ที่มาของรูป
 
 รูปต้นฉบับ 232 หน้าอยู่ที่ `../catalog/แยกแต่ละหน้า/` (นอก repo — ไฟล์ใหญ่ 332MB)
-Phase 1 จะ optimize เข้ามาไว้ใน `pages/`
+Phase 1 optimize แล้ว → `pages/` (แสดง 1000px) + `pages/zoom/` (คมชัด 1785px)

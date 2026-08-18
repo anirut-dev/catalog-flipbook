@@ -1,0 +1,14 @@
+{
+  "name": "catalog-flipbook-scripts",
+  "private": true,
+  "type": "module",
+  "description": "One-off image optimization for the flipbook. Not part of the site.",
+  "scripts": {
+    "plan": "node optimize-images.mjs --dry-run",
+    "optimize": "node optimize-images.mjs",
+    "optimize:force": "node optimize-images.mjs --force"
+  },
+  "dependencies": {
+    "sharp": "^0.34.2"
+  }
+}

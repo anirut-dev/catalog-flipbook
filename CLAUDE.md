@@ -25,15 +25,17 @@ index.html      single page; loads css/style.css and js/app.js
 css/style.css   all styles
 js/app.js       flipbook init (StPageFlip) + lazy loading + controls
 lib/            vendored StPageFlip files (committed, no CDN)
-pages/          optimized page images, committed to the repo
+pages/          optimized display images (page-001.webp …), committed
+pages/zoom/     full-size images for zoom, committed
 scripts/        one-off image optimization script (not shipped to the browser)
 ```
 
 Key design decisions that span files:
 
-- **Two image sizes per page.** `pages/` holds a display size (~1000px wide, ~120KB) used by the flipbook,
-  and a zoom size (~1785px, original width) loaded only when the user zooms. `js/app.js` must swap the
-  `src` on zoom rather than loading the large image up front.
+- **Two image sizes per page.** `pages/page-NNN.webp` is the display size (1000px wide, ~96KB avg) used by
+  the flipbook; `pages/zoom/page-NNN.webp` is the full size (1785px, ~250KB) loaded only when the user zooms.
+  `js/app.js` must swap the `src` on zoom rather than loading the large image up front.
+  Totals: 22.3MB display + 58.2MB zoom (from 332MB of source JPG).
 - **Lazy loading is mandatory, not an optimization.** 232 pages must never be requested at once.
   Load the current spread plus a small preload window ahead/behind.
 - **Page naming is the contract between `scripts/` and `js/app.js`.** Optimized files are
@@ -44,11 +46,12 @@ Key design decisions that span files:
 
 ### Source filename ordering (important)
 
-Original filenames are Thai text with spaces and unpadded numbers, e.g. `0.1 ปก-01.jpg`,
-`0.6 สารบัญ-01.jpg`, `1-01.jpg`, `10-01.jpg`. Plain alphabetical sort is wrong (`10` comes before `2`).
-Any renaming script must sort by the **numeric prefix**: `0.x` front-matter files first in their `0.x`
-order, then `1..N` sorted numerically. Verify the resulting order against the actual catalog before
-overwriting `pages/`.
+Source filenames come in three shapes, and every one starts with its page number:
+`0.1 ปก-01.jpg` … `0.6 สารบัญ-01.jpg` (6 front-matter pages), `1-01.jpg` … `214-01.jpg` plus `226-01.jpg`
+(back cover), and `215. Company Profile1-01.jpg` … `225. Company Profile11-01.jpg` (11 pages).
+`scripts/optimize-images.mjs` sorts by that **leading number only** — `224. Company Profile10` must sort
+by `224`, not by the trailing `10`, and plain alphabetical sort is wrong everywhere (`10` before `2`).
+Rerun `npm run plan` in `scripts/` to re-check the mapping before regenerating `pages/`.
 
 ## Phases
 
