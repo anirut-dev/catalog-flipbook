@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# vercel
+.vercel/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# logs
+*.log
+
+# รูปต้นฉบับดิบ (ถ้าเผลอ copy มา - ไม่ควร commit ไฟล์ใหญ่)
+pages-raw/
