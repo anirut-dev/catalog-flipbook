@@ -37,7 +37,15 @@ Key design decisions that span files:
   `js/app.js` must swap the `src` on zoom rather than loading the large image up front.
   Totals: 22.3MB display + 58.2MB zoom (from 332MB of source JPG).
 - **Lazy loading is mandatory, not an optimization.** 232 pages must never be requested at once.
-  Load the current spread plus a small preload window ahead/behind.
+  `updateLoadedImages()` in `js/app.js` keeps a window of `LOAD_RADIUS` pages either side of the
+  current one: it sets `src` inside the window and *removes* `src` outside it, so at most ~9 images
+  are in memory no matter how far the user browses.
+- **StPageFlip overwrites `width` on its own container.** `size: "stretch"` also derives height from
+  the container's width, so the book will happily overflow a short window. `fitBook()` works around
+  both: it computes the width from the free window *height* and applies it to the `#book-frame`
+  wrapper, never to `#flipbook`. It also measures `window.innerHeight` rather than `.viewer`, because
+  before `loadFromHTML()` the 232 raw page divs are still in normal flow and inflate any container
+  measurement.
 - **Page naming is the contract between `scripts/` and `js/app.js`.** Optimized files are
   `page-001.webp` … `page-232.webp` (zero-padded to 3 digits), so page numbers can be built by
   string formatting instead of a manifest.

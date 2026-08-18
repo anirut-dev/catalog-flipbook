@@ -10,7 +10,7 @@ catalog-flipbook/
 ├── index.html              หน้าเว็บหลัก
 ├── css/style.css           สไตล์
 ├── js/app.js               โค้ดพลิกหน้า + lazy load
-├── lib/                    StPageFlip (วางไฟล์ library ที่นี่)
+├── lib/                    StPageFlip 2.0.7 (page-flip.browser.js + stPageFlip.css)
 ├── pages/                  รูปหน้าที่ optimize แล้ว (page-001.webp ...)
 │   └── zoom/               รูปคมชัดสำหรับตอน zoom
 ├── scripts/                สคริปต์ optimize รูป (รันครั้งเดียว)
@@ -22,8 +22,9 @@ catalog-flipbook/
 
 - [x] **Phase 0** — ตั้งโครงโปรเจค + git
 - [x] **Phase 1** — optimize รูป (332MB → 80.5MB, JPG → WebP, เปลี่ยนชื่อเรียงเลข)
-- [ ] **Phase 2** — หน้าเว็บพื้นฐาน + StPageFlip พลิกได้
-- [ ] **Phase 3** — lazy load + ปุ่ม (ถัดไป/ก่อนหน้า, zoom, thumbnail, มือถือ)
+- [x] **Phase 2** — หน้าเว็บพื้นฐาน + StPageFlip พลิกได้
+- [ ] **Phase 3** — zoom (pages/zoom/), thumbnail, ปรับ preload, ทดสอบมือถือ
+      (lazy load + ปุ่มถัดไป/ก่อนหน้า + ช่องใส่เลขหน้า ทำใน Phase 2 แล้ว)
 - [ ] **Phase 4** — deploy Vercel
 
 ## Performance

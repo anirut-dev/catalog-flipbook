@@ -1,19 +1,153 @@
-/* Phase 2-3 จะเขียนสไตล์ flipbook ที่นี่ */
+/* Sangudom Catalog Flipbook — Phase 2 */
+
+:root {
+  --bg: #1c1c1f;
+  --bg-soft: #2a2a2e;
+  --text: #f4f4f5;
+  --text-dim: #a1a1aa;
+  --accent: #f0b429;
+}
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  background: #f4f4f5;
-  color: #18181b;
-}
+html, body { height: 100%; }
 
-.app {
-  min-height: 100vh;
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", "Sarabun", sans-serif;
+  background: var(--bg);
+  color: var(--text);
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* the book fills the screen; the page itself never scrolls */
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  flex: none;
+  padding: 10px 16px;
+  text-align: center;
+  border-bottom: 1px solid #ffffff14;
+}
+
+.topbar__title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+}
+
+/* ---------- book ---------- */
+
+.viewer {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  min-height: 0; /* lets the grid shrink instead of pushing the controls off-screen */
+}
+
+.book-frame {
+  max-width: 100%;
+}
+
+.flipbook {
+  /* Until StPageFlip takes over, the 232 page divs are ordinary block elements and
+     would stack into a very tall column. Collapse them so they never affect layout. */
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.is-ready .book-frame {
+  max-width: 100%;
+}
+
+.flipbook {
+  height: auto;
+  overflow: visible;
+  visibility: visible;
+}
+
+.page {
+  background: #fff;
+  overflow: hidden;
+}
+
+.page__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.loading {
+  position: absolute;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+/* ---------- controls ---------- */
+
+.controls {
+  flex: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: var(--bg-soft);
+  border-top: 1px solid #ffffff14;
+}
+
+.btn {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff14;
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn:hover:not(:disabled) { background: #ffffff24; }
+.btn:disabled { opacity: 0.3; cursor: default; }
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.pager__input {
+  width: 64px;
+  padding: 6px 8px;
+  border: 1px solid #ffffff24;
+  border-radius: 6px;
+  background: #00000033;
+  color: var(--text);
+  font: inherit;
   text-align: center;
+}
+
+.pager__input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* hide the number-input spinner arrows — the field is small */
+.pager__input::-webkit-outer-spin-button,
+.pager__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pager__input { -moz-appearance: textfield; appearance: textfield; }
+
+@media (max-width: 600px) {
+  .topbar__title { font-size: 12px; }
+  .viewer { padding: 8px; }
 }
