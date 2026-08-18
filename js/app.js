@@ -1,7 +1,15 @@
 // Sangudom Catalog Flipbook
 // Phase 3 — StPageFlip page turning, lazy loading, zoom overlay, page picker.
 
-const TOTAL_PAGES = 232;
+// Filled in from pages/manifest.json, which the optimizer writes. Never hard-code the
+// page count here: merging or dropping a page changes it, and a stale number silently
+// breaks the last pages.
+let TOTAL_PAGES = 0;
+
+/** index (file position) -> what is printed on that page, e.g. 150 -> "144" */
+const labelByIndex = new Map();
+/** printed number -> index, so the page box can speak the customer's language */
+const indexByPrinted = new Map();
 
 // Source pages are 1785x2552, so one page is 0.699 as wide as it is tall.
 // StPageFlip needs a base size; `size: "stretch"` scales it to the screen.
@@ -45,6 +53,30 @@ const el = {
   zoomNext: document.getElementById("zoom-next"),
   zoomClose: document.getElementById("zoom-close"),
 };
+
+async function loadManifest() {
+  const response = await fetch("pages/manifest.json");
+  if (!response.ok) throw new Error(`manifest.json returned ${response.status}`);
+  const manifest = await response.json();
+
+  TOTAL_PAGES = manifest.totalPages;
+  for (const page of manifest.pages) {
+    labelByIndex.set(page.index, page.label);
+    if (page.printed) indexByPrinted.set(Number(page.label), page.index);
+  }
+}
+
+/** What the reader sees printed on that page - falls back to the file position. */
+function labelOf(index) {
+  return labelByIndex.get(index) ?? String(index);
+}
+
+/** "144 – 145" for a spread, or just "ปก" for a single page. */
+function spreadLabel(current) {
+  const left = labelOf(current);
+  const right = current < TOTAL_PAGES ? labelOf(current + 1) : null;
+  return right ? `${left} – ${right}` : left;
+}
 
 function padded(pageNumber) {
   return String(pageNumber).padStart(3, "0");
@@ -138,7 +170,12 @@ function fitBook(pageFlip) {
 function syncControls(pageFlip) {
   // StPageFlip counts from 0; humans count from 1.
   const current = pageFlip.getCurrentPageIndex() + 1;
-  el.input.value = String(current);
+  const label = labelOf(current);
+
+  // Front matter has no printed number, so leave the box empty rather than lie.
+  el.input.value = indexByPrinted.has(Number(label)) ? label : "";
+  el.total.textContent = spreadLabel(current);
+
   el.prev.disabled = current <= 1;
   el.next.disabled = current >= TOTAL_PAGES;
   updateLoadedImages(current);
@@ -169,7 +206,7 @@ function buildThumbs(pageFlip) {
     img.height = 114;
 
     const label = document.createElement("span");
-    label.textContent = String(page);
+    label.textContent = labelOf(page);
 
     button.append(img, label);
     fragment.append(button);
@@ -241,8 +278,8 @@ function setScale(next) {
 function showZoomPage(page) {
   zoom.page = Math.min(TOTAL_PAGES, Math.max(1, page));
   el.zoomImg.src = zoomSrc(zoom.page);
-  el.zoomImg.alt = `หน้า ${zoom.page} (ขยาย)`;
-  el.zoomPage.textContent = `หน้า ${zoom.page} / ${TOTAL_PAGES}`;
+  el.zoomImg.alt = `หน้า ${labelOf(zoom.page)} (ขยาย)`;
+  el.zoomPage.textContent = `หน้า ${labelOf(zoom.page)}`;
   el.zoomPrev.disabled = zoom.page <= 1;
   el.zoomNext.disabled = zoom.page >= TOTAL_PAGES;
   setScale(MIN_SCALE);
@@ -322,7 +359,9 @@ function wireZoom() {
   }
 }
 
-function init() {
+async function init() {
+  await loadManifest();
+
   const pages = buildPages();
 
   const pageFlip = new St.PageFlip(el.book, {
@@ -346,8 +385,9 @@ function init() {
   fitBook(null);
   pageFlip.loadFromHTML(pages);
 
-  el.total.textContent = `/ ${pageFlip.getPageCount()}`;
-  el.input.max = String(pageFlip.getPageCount());
+  const lastPrinted = Math.max(...indexByPrinted.keys());
+  el.input.max = String(lastPrinted);
+  el.input.placeholder = `1-${lastPrinted}`;
   el.loading.hidden = true;
   document.body.classList.add("is-ready");
 
@@ -369,11 +409,15 @@ function init() {
 
   el.pager.addEventListener("submit", (event) => {
     event.preventDefault();
-    const wanted = Number(el.input.value);
-    if (Number.isInteger(wanted) && wanted >= 1 && wanted <= TOTAL_PAGES) {
-      pageFlip.turnToPage(wanted - 1);
-      syncControls(pageFlip);
+    // The reader types the number printed on the page; look up which file that is.
+    const target = indexByPrinted.get(Number(el.input.value));
+    if (target) {
+      pageFlip.turnToPage(target - 1);
+    } else {
+      el.input.classList.add("is-invalid");
+      setTimeout(() => el.input.classList.remove("is-invalid"), 600);
     }
+    syncControls(pageFlip);
     el.input.blur();
   });
 
@@ -406,4 +450,7 @@ function init() {
   syncControls(pageFlip);
 }
 
-init();
+init().catch((error) => {
+  el.loading.textContent = "โหลดไม่สำเร็จ ลองรีเฟรชหน้าอีกครั้ง";
+  console.error("[flipbook] init failed:", error);
+});
