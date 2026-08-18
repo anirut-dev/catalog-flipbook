@@ -5,8 +5,9 @@
 //   pages/page-001.webp         display size (~1000px wide) - used by the flipbook
 //   pages/zoom/page-001.webp    zoom size (~1785px wide)    - loaded only on zoom
 //   pages/thumbs/page-001.webp  thumbnail (160px wide)      - the page picker drawer
+//   pages/manifest.json         page count + printed page labels (see labelFor)
 
-import { readdir, mkdir, stat } from "node:fs/promises";
+import { readdir, mkdir, stat, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,6 +23,7 @@ const OVERRIDE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp"];
 const OUT_DISPLAY = path.join(ROOT, "pages");
 const OUT_ZOOM = path.join(ROOT, "pages", "zoom");
 const OUT_THUMB = path.join(ROOT, "pages", "thumbs");
+const MANIFEST = path.join(ROOT, "pages", "manifest.json");
 
 const SIZES = [
   { dir: OUT_DISPLAY, width: 1000, quality: 80, label: "display" },
@@ -49,6 +51,26 @@ function pageNumberOf(filename) {
 
 function padded(n) {
   return String(n).padStart(3, "0");
+}
+
+/**
+ * The number printed inside the artwork is NOT the position of the file.
+ * The catalog has 6 unnumbered front-matter pages, so file 150 carries "144" on it.
+ * Luckily the source filename already holds the printed number:
+ *   "1-01.jpg"          -> printed "1"
+ *   "144-01.jpg"        -> printed "144"
+ *   "0.2 ประวัติ-01.jpg" -> front matter, named "ประวัติ", no printed number
+ * The manifest records this so the UI can talk in printed numbers, which is what a
+ * customer actually sees on the page.
+ */
+function labelFor(filename) {
+  const frontMatter = filename.match(/^0\.\d+\s+(.+?)-\d+\.jpe?g$/i);
+  if (frontMatter) return { label: frontMatter[1].trim(), printed: false };
+
+  const numbered = filename.match(/^(\d+)\D/);
+  if (numbered) return { label: numbered[1], printed: true };
+
+  return { label: null, printed: false };
 }
 
 /**
@@ -90,11 +112,16 @@ async function collectSources() {
   return sorted.map((entry, index) => {
     const page = index + 1; // position in the sorted list = final page number
     const override = findOverride(page);
+    // The label comes from the ORIGINAL filename even when an override replaces the
+    // artwork - a corrected page still carries the same printed number.
+    const { label, printed } = labelFor(entry.file);
     return {
       src: override ?? path.join(SRC_DIR, entry.file),
       srcName: override ? `${path.basename(override)} (override)` : entry.file,
       isOverride: Boolean(override),
       page,
+      label,
+      printed,
       out: `page-${padded(page)}.webp`,
     };
   });
@@ -112,6 +139,15 @@ async function convert(job) {
     written++;
   }
   return written;
+}
+
+async function writeManifest(jobs) {
+  const manifest = {
+    totalPages: jobs.length,
+    pages: jobs.map((job) => ({ index: job.page, label: job.label, printed: job.printed })),
+  };
+  await writeFile(MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  return manifest;
 }
 
 async function dirSizeMB(dir) {
@@ -143,7 +179,9 @@ async function main() {
     console.log("\nDry run - nothing written. Mapping (first 10, last 10):\n");
     const show = [...jobs.slice(0, 10), null, ...jobs.slice(-10)];
     for (const job of show) {
-      console.log(job ? `  ${job.out}  <-  ${job.srcName}` : "  ...");
+      console.log(
+        job ? `  ${job.out}  <-  ${job.srcName}   [${job.label ?? "?"}]` : "  ..."
+      );
     }
     console.log("\nIf the order looks right, run: npm run optimize");
     return;
@@ -162,11 +200,14 @@ async function main() {
     process.stdout.write(`\r[${job.page}/${jobs.length}] ${tag} ${job.out}   `);
   }
 
+  const manifest = await writeManifest(jobs);
+
   const seconds = ((Date.now() - startedAt) / 1000).toFixed(0);
   console.log(`\n\nDone in ${seconds}s (${skipped} already existed - use --force to redo)`);
   console.log(`  pages/         ${await dirSizeMB(OUT_DISPLAY)} MB`);
   console.log(`  pages/zoom/    ${await dirSizeMB(OUT_ZOOM)} MB`);
   console.log(`  pages/thumbs/  ${await dirSizeMB(OUT_THUMB)} MB`);
+  console.log(`  manifest.json  ${manifest.totalPages} pages`);
 }
 
 main().catch((err) => {

@@ -51,8 +51,15 @@ Key design decisions that span files:
   before `loadFromHTML()` the 232 raw page divs are still in normal flow and inflate any container
   measurement.
 - **Page naming is the contract between `scripts/` and `js/app.js`.** Optimized files are
-  `page-001.webp` … `page-232.webp` (zero-padded to 3 digits), so page numbers can be built by
-  string formatting instead of a manifest.
+  `page-001.webp` … (zero-padded to 3 digits), so paths are built by string formatting.
+- **Two numbering systems, and the UI speaks the printed one.** The file position is not the number
+  printed on the artwork: 6 unnumbered front-matter pages mean `page-150.webp` carries "144". The
+  optimizer writes `pages/manifest.json` mapping index -> printed label (taken from the source
+  filename, which is the printed number), and `js/app.js` loads it at startup. The page box accepts
+  the printed number a customer actually sees. Never hard-code the page count in `app.js` - merging
+  or dropping a page changes it, and `manifest.json` is the single source of truth.
+- **`manifest.json` must not get the immutable cache header.** `vercel.json` deliberately matches
+  `/pages/(.*).webp`, not `/pages/(.*)` - the images never change content, the manifest does.
 - **Source images are outside the repo** at `../catalog/แยกแต่ละหน้า/` (332MB of JPG, ~1785x2552).
   Never commit them. `pages-raw/` is gitignored to catch accidental copies.
 

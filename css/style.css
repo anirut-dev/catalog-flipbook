@@ -137,6 +137,16 @@ body {
   text-align: center;
 }
 
+.pager__input.is-invalid {
+  border-color: #f87171;
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
 .pager__input:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;

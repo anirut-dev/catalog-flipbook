@@ -54,9 +54,10 @@
 
     <form class="pager" id="pager">
       <label class="pager__label" for="page-input">หน้า</label>
-      <input class="pager__input" id="page-input" type="number" min="1" value="1"
-             inputmode="numeric" aria-label="ไปที่หน้า">
-      <span class="pager__total" id="page-total">/ 232</span>
+      <!-- This is the number PRINTED on the page, not the file position - see js/app.js -->
+      <input class="pager__input" id="page-input" type="number" min="1"
+             inputmode="numeric" aria-label="ไปที่หน้าที่พิมพ์เลขนี้">
+      <span class="pager__total" id="page-total"></span>
     </form>
 
     <button type="button" id="btn-next" class="btn" aria-label="หน้าถัดไป">›</button>

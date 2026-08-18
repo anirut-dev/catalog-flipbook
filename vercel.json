@@ -3,7 +3,7 @@
   "cleanUrls": true,
   "headers": [
     {
-      "source": "/pages/(.*)",
+      "source": "/pages/(.*).webp",
       "headers": [
         {
           "key": "Cache-Control",
