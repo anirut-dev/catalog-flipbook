@@ -16,6 +16,8 @@ const ROOT = path.resolve(__dirname, "..");
 
 // Source images live OUTSIDE the repo (332MB of JPG - never commit them).
 const SRC_DIR = path.resolve(ROOT, "..", "catalog", "แยกแต่ละหน้า");
+const OVERRIDES_DIR = path.join(__dirname, "overrides");
+const OVERRIDE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp"];
 const OUT_DISPLAY = path.join(ROOT, "pages");
 const OUT_ZOOM = path.join(ROOT, "pages", "zoom");
 
@@ -46,6 +48,18 @@ function padded(n) {
   return String(n).padStart(3, "0");
 }
 
+/**
+ * A page can be corrected by dropping `overrides/page-NNN.<ext>` in this folder.
+ * Without this, re-running the script would quietly restore the outdated original.
+ */
+function findOverride(page) {
+  for (const ext of OVERRIDE_EXTENSIONS) {
+    const candidate = path.join(OVERRIDES_DIR, `page-${padded(page)}${ext}`);
+    if (existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
 async function collectSources() {
   const entries = await readdir(SRC_DIR);
   const jpgs = entries.filter((f) => /\.jpe?g$/i.test(f));
@@ -70,12 +84,17 @@ async function collectSources() {
     }
   }
 
-  return sorted.map((entry, index) => ({
-    src: path.join(SRC_DIR, entry.file),
-    srcName: entry.file,
-    page: index + 1, // position in the sorted list = final page number
-    out: `page-${padded(index + 1)}.webp`,
-  }));
+  return sorted.map((entry, index) => {
+    const page = index + 1; // position in the sorted list = final page number
+    const override = findOverride(page);
+    return {
+      src: override ?? path.join(SRC_DIR, entry.file),
+      srcName: override ? `${path.basename(override)} (override)` : entry.file,
+      isOverride: Boolean(override),
+      page,
+      out: `page-${padded(page)}.webp`,
+    };
+  });
 }
 
 async function convert(job) {
@@ -108,7 +127,11 @@ async function main() {
   }
 
   const jobs = await collectSources();
+  const overrides = jobs.filter((job) => job.isOverride);
   console.log(`Found ${jobs.length} source images (expected ${EXPECTED_PAGES})`);
+  if (overrides.length) {
+    console.log(`Using ${overrides.length} override(s): ${overrides.map((j) => j.out).join(", ")}`);
+  }
   if (jobs.length !== EXPECTED_PAGES) {
     console.warn(`WARNING: count is not ${EXPECTED_PAGES}. Check the source folder before continuing.`);
   }
