@@ -1,0 +1,3 @@
+# The optimizer is a one-time local tool - it never needs to ship to the CDN.
+# scripts/overrides/ holds a 1.6MB PNG source that the site does not load.
+scripts/
