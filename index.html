@@ -24,6 +24,31 @@
     <div class="loading" id="loading">กำลังโหลด…</div>
   </main>
 
+  <!-- Zoom overlay: uses the sharp pages/zoom/ image, loaded only when opened. -->
+  <div class="zoom" id="zoom" hidden>
+    <div class="zoom__stage" id="zoom-stage">
+      <img class="zoom__img" id="zoom-img" alt="" draggable="false">
+    </div>
+    <div class="zoom__bar">
+      <button type="button" class="btn" id="zoom-prev" aria-label="หน้าก่อนหน้า">‹</button>
+      <button type="button" class="btn" id="zoom-out" aria-label="ย่อ">−</button>
+      <span class="zoom__level" id="zoom-level">100%</span>
+      <button type="button" class="btn" id="zoom-in" aria-label="ขยาย">+</button>
+      <button type="button" class="btn" id="zoom-next" aria-label="หน้าถัดไป">›</button>
+      <button type="button" class="btn btn--close" id="zoom-close" aria-label="ปิด">✕</button>
+    </div>
+    <p class="zoom__page" id="zoom-page">หน้า 1</p>
+  </div>
+
+  <!-- Page picker: 232 thumbnails, loaded lazily by the browser. -->
+  <div class="thumbs" id="thumbs" hidden>
+    <div class="thumbs__head">
+      <span>เลือกหน้า</span>
+      <button type="button" class="btn btn--close" id="thumbs-close" aria-label="ปิด">✕</button>
+    </div>
+    <div class="thumbs__strip" id="thumbs-strip"></div>
+  </div>
+
   <nav class="controls" aria-label="ควบคุมการพลิกหน้า">
     <button type="button" id="btn-prev" class="btn" aria-label="หน้าก่อนหน้า">‹</button>
 
@@ -35,6 +60,11 @@
     </form>
 
     <button type="button" id="btn-next" class="btn" aria-label="หน้าถัดไป">›</button>
+
+    <span class="controls__sep"></span>
+
+    <button type="button" id="btn-thumbs" class="btn btn--wide" aria-label="เลือกหน้า">☰</button>
+    <button type="button" id="btn-zoom" class="btn btn--wide" aria-label="ขยายหน้านี้">🔍</button>
   </nav>
 
   <script src="lib/page-flip.browser.js"></script>
