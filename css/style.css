@@ -151,3 +151,158 @@ body {
   .topbar__title { font-size: 12px; }
   .viewer { padding: 8px; }
 }
+
+/* ---------- extra control buttons ---------- */
+
+.btn--wide {
+  width: auto;
+  min-width: 44px;
+  padding: 0 14px;
+  border-radius: 22px;
+  font-size: 16px;
+}
+
+.btn--close {
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+}
+
+.controls__sep {
+  width: 1px;
+  height: 24px;
+  background: #ffffff24;
+  margin: 0 4px;
+}
+
+/* ---------- page picker ---------- */
+
+.thumbs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  background: var(--bg-soft);
+  border-top: 1px solid #ffffff24;
+  box-shadow: 0 -8px 24px #0006;
+}
+
+.thumbs[hidden] { display: none; }
+
+.thumbs__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.thumbs__strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 0 12px calc(12px + env(safe-area-inset-bottom));
+  scrollbar-width: thin;
+}
+
+.thumb {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.thumb img {
+  display: block;
+  /* Explicit height, not auto: a lazy image with no intrinsic size collapses the
+     drawer to nothing, and a collapsed drawer never scrolls its images into view,
+     so they never load. Pages are 1000x1430, so 80x114 keeps the ratio. */
+  width: 80px;
+  height: 114px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 2px solid transparent;
+  background: #fff;
+}
+
+.thumb:hover img { border-color: #ffffff40; }
+
+.thumb.is-current img { border-color: var(--accent); }
+.thumb.is-current { color: var(--accent); }
+
+/* ---------- zoom overlay ---------- */
+
+.zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: #0f0f11f2;
+}
+
+.zoom[hidden] { display: none; }
+
+.zoom__stage {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  min-height: 0;
+  touch-action: none; /* we handle pan and pinch ourselves via pointer events */
+  cursor: grab;
+}
+
+.zoom__stage:active { cursor: grabbing; }
+
+.zoom__img {
+  max-width: 100%;
+  max-height: 100%;
+  transform-origin: center center;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.zoom__bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+}
+
+.zoom__level {
+  min-width: 56px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums; /* stops the width jitter as the number changes */
+}
+
+.zoom__page {
+  flex: none;
+  padding: 0 10px calc(12px + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+@media (max-width: 600px) {
+  .thumb img { width: 56px; height: 80px; }
+  .controls { gap: 8px; }
+  .btn--wide { padding: 0 10px; }
+}
+

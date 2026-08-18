@@ -2,8 +2,9 @@
 // Run once:  npm install  &&  npm run plan  (check order)  &&  npm run optimize
 //
 // Output:
-//   pages/page-001.webp        display size (~1000px wide) - used by the flipbook
-//   pages/zoom/page-001.webp   zoom size (~1785px wide)    - loaded only on zoom
+//   pages/page-001.webp         display size (~1000px wide) - used by the flipbook
+//   pages/zoom/page-001.webp    zoom size (~1785px wide)    - loaded only on zoom
+//   pages/thumbs/page-001.webp  thumbnail (160px wide)      - the page picker drawer
 
 import { readdir, mkdir, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -20,10 +21,12 @@ const OVERRIDES_DIR = path.join(__dirname, "overrides");
 const OVERRIDE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp"];
 const OUT_DISPLAY = path.join(ROOT, "pages");
 const OUT_ZOOM = path.join(ROOT, "pages", "zoom");
+const OUT_THUMB = path.join(ROOT, "pages", "thumbs");
 
 const SIZES = [
   { dir: OUT_DISPLAY, width: 1000, quality: 80, label: "display" },
   { dir: OUT_ZOOM, width: 1785, quality: 82, label: "zoom" },
+  { dir: OUT_THUMB, width: 160, quality: 70, label: "thumb" },
 ];
 
 const EXPECTED_PAGES = 232;
@@ -146,8 +149,9 @@ async function main() {
     return;
   }
 
-  await mkdir(OUT_DISPLAY, { recursive: true });
-  await mkdir(OUT_ZOOM, { recursive: true });
+  for (const size of SIZES) {
+    await mkdir(size.dir, { recursive: true });
+  }
 
   const startedAt = Date.now();
   let skipped = 0;
@@ -160,8 +164,9 @@ async function main() {
 
   const seconds = ((Date.now() - startedAt) / 1000).toFixed(0);
   console.log(`\n\nDone in ${seconds}s (${skipped} already existed - use --force to redo)`);
-  console.log(`  pages/       ${await dirSizeMB(OUT_DISPLAY)} MB`);
-  console.log(`  pages/zoom/  ${await dirSizeMB(OUT_ZOOM)} MB`);
+  console.log(`  pages/         ${await dirSizeMB(OUT_DISPLAY)} MB`);
+  console.log(`  pages/zoom/    ${await dirSizeMB(OUT_ZOOM)} MB`);
+  console.log(`  pages/thumbs/  ${await dirSizeMB(OUT_THUMB)} MB`);
 }
 
 main().catch((err) => {

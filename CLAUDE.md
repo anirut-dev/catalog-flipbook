@@ -27,6 +27,7 @@ js/app.js       flipbook init (StPageFlip) + lazy loading + controls
 lib/            vendored StPageFlip files (committed, no CDN)
 pages/          optimized display images (page-001.webp …), committed
 pages/zoom/     full-size images for zoom, committed
+pages/thumbs/   160px previews for the page picker, committed
 scripts/        one-off image optimization script (not shipped to the browser)
 ```
 
@@ -35,7 +36,8 @@ Key design decisions that span files:
 - **Two image sizes per page.** `pages/page-NNN.webp` is the display size (1000px wide, ~96KB avg) used by
   the flipbook; `pages/zoom/page-NNN.webp` is the full size (1785px, ~250KB) loaded only when the user zooms.
   `js/app.js` must swap the `src` on zoom rather than loading the large image up front.
-  Totals: 22.3MB display + 58.2MB zoom (from 332MB of source JPG).
+  `pages/thumbs/page-NNN.webp` (160px, ~4KB) feeds the page picker - using display images there
+  would pull 22MB for one strip. Totals: 22.3MB display + 58.1MB zoom + 1.0MB thumbs.
 - **Lazy loading is mandatory, not an optimization.** 232 pages must never be requested at once.
   `updateLoadedImages()` in `js/app.js` keeps a window of `LOAD_RADIUS` pages either side of the
   current one: it sets `src` inside the window and *removes* `src` outside it, so at most ~9 images
@@ -60,6 +62,15 @@ Source filenames come in three shapes, and every one starts with its page number
 `scripts/optimize-images.mjs` sorts by that **leading number only** — `224. Company Profile10` must sort
 by `224`, not by the trailing `10`, and plain alphabetical sort is wrong everywhere (`10` before `2`).
 Rerun `npm run plan` in `scripts/` to re-check the mapping before regenerating `pages/`.
+
+### Gotchas found the hard way
+
+- **A lazy `<img>` with no explicit height collapses its container**, and a collapsed container never
+  scrolls into view, so the images never load at all. The thumbnails set `width`/`height` attributes
+  *and* a fixed CSS height for exactly this reason - do not change them back to `height: auto`.
+- **`document.visibilityState === "hidden"` breaks browser testing.** A minimized or occluded Chrome
+  window does not paint and does not run native lazy loading, so screenshots come back blank/stale and
+  thumbnails appear broken. Check visibility before believing a screenshot.
 
 ## Phases
 
