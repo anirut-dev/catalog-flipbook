@@ -3,7 +3,7 @@
 เว็บ flipbook (พลิกหน้าเหมือนหนังสือจริง) จากแคตตาล็อกสินค้า Sangudom Lighting Centre 2021
 สร้างด้วย HTML/CSS/JS ธรรมดา + [StPageFlip](https://github.com/Nodlik/StPageFlip) — deploy บน Vercel
 
-**เว็บจริง:** https://catalog-flipbook.vercel.app
+**เว็บจริง:** https://sangudom-catalog.vercel.app
 (push ขึ้น `main` เมื่อไหร่ Vercel deploy ให้อัตโนมัติ / PR จะได้ preview URL ของตัวเอง)
 
 ## โครงสร้างโปรเจค
@@ -30,7 +30,7 @@ catalog-flipbook/
 - [x] **Phase 2** — หน้าเว็บพื้นฐาน + StPageFlip พลิกได้
 - [x] **Phase 3** — zoom overlay, thumbnail picker, คีย์บอร์ด, pinch/pan
       (ยังไม่ได้เทสบนมือถือจริง)
-- [x] **Phase 4** — deploy Vercel → https://catalog-flipbook.vercel.app
+- [x] **Phase 4** — deploy Vercel → https://sangudom-catalog.vercel.app
 
 ## Performance
 

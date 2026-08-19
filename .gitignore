@@ -17,3 +17,7 @@ Thumbs.db
 
 # รูปต้นฉบับดิบ (ถ้าเผลอ copy มา - ไม่ควร commit ไฟล์ใหญ่)
 pages-raw/
+
+# รูปต้นแบบ/รูปชั่วคราวที่ root (รูปจริงอยู่ pages/ กับ scripts/overrides/)
+/*.png
+/*.jpg
