@@ -15,7 +15,7 @@ There is no build, no test suite, and no `package.json` at the project root — 
 - Local preview: `npx serve .` or `python -m http.server 8000`, then open the printed URL.
   Opening `index.html` via `file://` will break `fetch`/image loading later, so use a local server.
 - Deploy: automatic. Vercel is connected to the GitHub repo - a push to `main` deploys to
-  production (https://catalog-flipbook.vercel.app) and any PR gets its own preview URL.
+  production (https://sangudom-catalog.vercel.app) and any PR gets its own preview URL.
   `npx vercel` still works for a manual deploy but is not the normal path.
 - Image optimization (Phase 1) lives in `scripts/` and is a **one-time run**, not part of the site build.
   If a `package.json` is added there for `sharp`, keep it inside `scripts/` so the site root stays dependency-free.
